@@ -1,0 +1,82 @@
+<html>
+	<head>
+		<title>Billout Batches</title>
+		<style>
+			div {
+				display: grid;
+				grid-template-columns: 5rem 5rem;
+				gap: 1rem;
+				padding: 1rem;
+				font-family: monospace;
+			}
+		</style>
+	</head>
+	<body>
+		<input type="date" />
+
+		<div>
+		  <output id="1"></output>
+		  <output id="2"></output>
+		  <output id="3"></output>
+		  <output id="4"></output>
+		</div>
+
+		<script>
+			function getWeek(date) {
+				const jan1st = new Date(date.getFullYear(), 0, 1);
+
+				const firstDayOfYear = jan1st.getDay();
+				const ordinal =
+					Math.floor(
+						(date.getTime() - jan1st.getTime() - (date.getTimezoneOffset() - jan1st.getTimezoneOffset()) * 60000) /
+						86400000,
+					) + 1;
+
+				// if the year starts after the middle of a week
+				if (firstDayOfYear > 3) {
+					return Math.floor((ordinal + firstDayOfYear - 1) / 7);
+				}
+
+				const weeknum = Math.floor((ordinal + firstDayOfYear - 1) / 7) + 1;
+				if (weeknum > 52) {
+					const nYear = new Date(date.getFullYear() + 1, 0, 1);
+					const nday = nYear.getDay();
+					// if the next year starts before the middle of the week, it is week #1 of that year
+					return nday < 4 ? 1 : 53;
+				}
+
+				return weeknum;
+			}
+
+			function batchWeek(n) {
+				return (n % 52);
+			}
+
+			function fmt(batch, n) {
+				return batch + n.toString().padStart(2, "0");
+			}
+
+			const WEEK1_EL = document.getElementById("1");
+			const WEEK2_EL = document.getElementById("2");
+			const WEEK3_EL = document.getElementById("3");
+			const WEEK4_EL = document.getElementById("4");
+
+			document.querySelector("input").addEventListener("change", (evt) => {
+				const date = evt.currentTarget.valueAsDate;
+				const week = getWeek(date);
+
+				const BATCH = (week & 1) === 0 ? "A" : "B";
+
+				const week1 = batchWeek(week);
+				const week2 = batchWeek(week1 + 12);
+				const week3 = batchWeek(week2 + 12);
+				const week4 = batchWeek(week3 + 12);
+
+				WEEK1_EL.innerText = fmt(BATCH, week1);
+				WEEK2_EL.innerText = fmt(BATCH, week2);
+				WEEK3_EL.innerText = fmt(BATCH, week3);
+				WEEK4_EL.innerText = fmt(BATCH, week4);
+			});
+		</script>
+	</body>
+</html>
